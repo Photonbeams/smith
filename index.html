@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vision Board + AI + Schedule</title>
+<style>
+  body { font-family: Arial; background: #111; color: #eee; padding: 20px; }
+  .tabs { display: flex; gap: 20px; cursor: pointer; margin-bottom: 20px; }
+  .tab { padding: 10px 20px; border-bottom: 2px solid transparent; }
+  .tab.active { border-bottom: 2px solid #fff; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  input { padding: 10px; font-size: 16px; width: 250px; margin-top: 10px; }
+  button { padding: 10px 20px; margin-left: 10px; }
+  ul { list-style: none; padding: 0; }
+  li { margin-bottom: 5px; }
+</style>
+</head>
+<body>
+
+<h1>Vision Board App</h1>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" data-tab="ai">AI Chat</div>
+  <div class="tab" data-tab="goals">Goals</div>
+  <div class="tab" data-tab="schedule">Schedule</div>
+</div>
+
+<!-- AI Chat -->
+<div id="ai" class="tab-content active">
+  <input type="text" id="userInput" placeholder="Say something..." />
+  <button id="sendBtn">Send</button>
+  <div id="output" style="margin-top:20px;"></div>
+</div>
+
+<!-- Goals -->
+<div id="goals" class="tab-content">
+  <input type="text" id="goalInput" placeholder="Add a goal..." />
+  <button id="addGoalBtn">Add</button>
+  <ul id="goalList"></ul>
+</div>
+
+<!-- Schedule -->
+<div id="schedule" class="tab-content">
+  <input type="text" id="eventInput" placeholder="Add an event..." />
+  <input type="time" id="timeInput" />
+  <button id="addEventBtn">Add</button>
+  <ul id="scheduleList"></ul>
+</div>
+
+<script>
+  // ---------- Tabs ----------
+  const tabs = document.querySelectorAll('.tab');
+  const contents = document.querySelectorAll('.tab-content');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ---------- AI Memory ----------
+  let memory = JSON.parse(localStorage.getItem('aiMemory')) || [];
+
+  function tinyAI(input) {
+    const text = input.trim().toLowerCase();
+    const memoryMatch = memory.find(m => m.input === text);
+    if(memoryMatch) return memoryMatch.output;
+
+    const defaultResponses = { "hi": "Hello! How are you?", "hello": "Hello! How are you?" };
+    if(defaultResponses[text]) return defaultResponses[text];
+
+    const newResponse = prompt(`I don't know how to respond to "${input}". What should I say?`);
+    if(newResponse) {
+      memory.push({ input: text, output: newResponse });
+      localStorage.setItem('aiMemory', JSON.stringify(memory));
+      return newResponse;
+    }
+    return "I don't know what to say!";
+  }
+
+  const inputEl = document.getElementById('userInput');
+  const outputEl = document.getElementById('output');
+  document.getElementById('sendBtn').addEventListener('click', () => {
+    const text = inputEl.value;
+    if(!text.trim()) return;
+    const response = tinyAI(text);
+    outputEl.textContent = response;
+    inputEl.value = "";
+  });
+
+  // ---------- Goals ----------
+  let goals = JSON.parse(localStorage.getItem('goals')) || [];
+  const goalListEl = document.getElementById('goalList');
+
+  function renderGoals() {
+    goalListEl.innerHTML = '';
+    goals.forEach((goal, i) => {
+      const li = document.createElement('li');
+      li.textContent = goal;
+      const del = document.createElement('button');
+      del.textContent = '❌';
+      del.style.marginLeft = '10px';
+      del.onclick = () => {
+        goals.splice(i,1);
+        localStorage.setItem('goals', JSON.stringify(goals));
+        renderGoals();
+      }
+      li.appendChild(del);
+      goalListEl.appendChild(li);
+    });
+  }
+
+  document.getElementById('addGoalBtn').addEventListener('click', () => {
+    const val = document.getElementById('goalInput').value.trim();
+    if(!val) return;
+    goals.push(val);
+    localStorage.setItem('goals', JSON.stringify(goals));
+    document.getElementById('goalInput').value = '';
+    renderGoals();
+  });
+
+  renderGoals();
+
+  // ---------- Schedule ----------
+  let schedule = JSON.parse(localStorage.getItem('schedule')) || [];
+  const scheduleListEl = document.getElementById('scheduleList');
+
+  function renderSchedule() {
+    scheduleListEl.innerHTML = '';
+    schedule.forEach((event, i) => {
+      const li = document.createElement('li');
+      li.textContent = `${event.time} - ${event.name}`;
+      const del = document.createElement('button');
+      del.textContent = '❌';
+      del.style.marginLeft = '10px';
+      del.onclick = () => {
+        schedule.splice(i,1);
+        localStorage.setItem('schedule', JSON.stringify(schedule));
+        renderSchedule();
+      }
+      li.appendChild(del);
+      scheduleListEl.appendChild(li);
+    });
+  }
+
+  document.getElementById('addEventBtn').addEventListener('click', () => {
+    const name = document.getElementById('eventInput').value.trim();
+    const time = document.getElementById('timeInput').value;
+    if(!name || !time) return;
+    schedule.push({ name, time });
+    localStorage.setItem('schedule', JSON.stringify(schedule));
+    document.getElementById('eventInput').value = '';
+    document.getElementById('timeInput').value = '';
+    renderSchedule();
+  });
+
+  renderSchedule();
+</script>
+
+</body>
+</html>
+
