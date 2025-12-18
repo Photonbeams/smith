@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vision Board + AI + Schedule</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h1>Vision Board App</h1>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" data-tab="ai">AI Chat</div>
+  <div class="tab" data-tab="goals">Goals</div>
+  <div class="tab" data-tab="schedule">Schedule</div>
+</div>
+
+<!-- AI Chat -->
+<div id="ai" class="tab-content active">
+  <input type="text" id="userInput" placeholder="Say something..." />
+  <button id="sendBtn">Send</button>
+  <div id="output" style="margin-top:20px;"></div>
+</div>
+
+<!-- Goals -->
+<div id="goals" class="tab-content">
+  <input type="text" id="goalInput" placeholder="Add a goal..." />
+  <button id="addGoalBtn">Add</button>
+  <ul id="goalList"></ul>
+</div>
+
+<!-- Schedule -->
+<div id="schedule" class="tab-content">
+  <input type="text" id="eventInput" placeholder="Add an event..." />
+  <input type="time" id="timeInput" />
+  <button id="addEventBtn">Add</button>
+  <ul id="scheduleList"></ul>
+</div>
+
+<!-- JS -->
+<script src="js/ai.js"></script>
+<script src="js/goals.js"></script>
+<script src="js/schedule.js"></script>
+<script src="js/tabs.js"></script>
+
+</body>
+</html>
